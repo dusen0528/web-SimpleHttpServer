@@ -101,13 +101,7 @@ class SimpleHttpServerTest {
         //TODO#103 contentType header의 charset=utf-8 인지 검증 합니다.
 
 
-    }
 
-
-    @Test
-    @DisplayName("Content-Length")
-    void request5() throws URISyntaxException, IOException, InterruptedException {
-        //TODO#104 content-Length 값이 존재하는지 검증 합니다.
 
     }
 
