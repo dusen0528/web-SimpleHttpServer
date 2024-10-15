@@ -83,7 +83,7 @@ class ResponseUtilsTest {
         String actual = ResponseUtils.createResponseHeader(ResponseUtils.HttpStatus.NOT_FOUND.getCode(), "utf-8",100);
         log.debug("actual:{}",actual);
 
-        //TODO#111 actual (responseHeader)의 statusCode(400), description(Not Found) 포함되었는지 검증 합니다.
+        //TODO#111 actual (responseHeader)의 statusCode(404), description(Not Found) 포함되었는지 검증 합니다.
         Assertions.assertAll(
 
         );
