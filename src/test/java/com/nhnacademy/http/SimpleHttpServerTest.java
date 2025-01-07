@@ -12,7 +12,7 @@
 
 package com.nhnacademy.http;
 
-import ch.qos.logback.core.util.StringUtil;
+import com.nhnacademy.exceptions.ServerInitializationException;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.Assert;
 import org.junit.jupiter.api.*;
@@ -34,7 +34,12 @@ class SimpleHttpServerTest {
     @BeforeAll
     static void beforeAllSetUp(){
         Thread thread = new Thread(()->{
-            SimpleHttpServer simpleHttpServer = new SimpleHttpServer(TEST_PORT);
+            SimpleHttpServer simpleHttpServer = null;
+            try {
+                simpleHttpServer = new SimpleHttpServer(TEST_PORT);
+            } catch (ServerInitializationException e) {
+                throw new RuntimeException(e);
+            }
             try {
                 simpleHttpServer.start();
             } catch (IOException e) {
@@ -56,9 +61,9 @@ class SimpleHttpServerTest {
 
         HttpResponse<String> response = httpClient.send(request,HttpResponse.BodyHandlers.ofString());
         log.debug("response:{}",response.body());
+        // response.statusCode() == 200 검증 합니다.
 
-        //TODO#100 - response.statusCode() == 200 검증 합니다.
-
+        Assert.assertEquals(200, response.statusCode());
     }
 
     @Test
@@ -71,9 +76,14 @@ class SimpleHttpServerTest {
 
         HttpResponse<String> response = httpClient.send(request,HttpResponse.BodyHandlers.ofString());
 
-        //TODO#101 - response.body() 'hello' or 'java' 문자열이 포함되었는지 검증 합니다.
+        // response.body() 'hello' or 'java' 문자열이 포함되었는지 검증 합니다.
         Assertions.assertAll(
-
+                ()->{
+                    Assertions.assertTrue(response.body().contains("hello"));
+                },
+                ()->{
+                    Assertions.assertTrue(response.body().contains("java"));
+                }
         );
     }
 
@@ -90,8 +100,8 @@ class SimpleHttpServerTest {
         String actual = contentTypeOptional.get().toLowerCase();
         log.debug("contentType:{}",actual);
 
-        //TODO#102 contentType이 'text/html' 검증 합니다.
-
+        // contentType이 'text/html' 검증 합니다.
+        Assertions.assertTrue(actual.contains("text/html"));
 
     }
 
@@ -108,8 +118,8 @@ class SimpleHttpServerTest {
         String actual = contentTypeOptional.get().toLowerCase();
         log.debug("contentType:{}",actual);
 
-        //TODO#103 contentType header의 charset=utf-8 인지 검증 합니다.
-
+        // contentType header의 charset=utf-8 인지 검증 합니다.
+        Assertions.assertTrue(actual.contains("utf-8"));
     }
 
 
@@ -127,8 +137,8 @@ class SimpleHttpServerTest {
 
         log.debug("Content-Length:{}",actual);
 
-        //TODO#104 content-Length 값이 존재 하는지 검증 합니다.
-
+        // content-Length 값이 존재 하는지 검증 합니다.
+        Assertions.assertTrue(Objects.nonNull(actual) && !actual.isBlank());
     }
 
 

@@ -12,16 +12,23 @@
 
 package com.nhnacademy;
 
+import com.nhnacademy.exceptions.ServerInitializationException;
 import com.nhnacademy.http.SimpleHttpServer;
 import lombok.extern.slf4j.Slf4j;
 import java.io.*;
 
 @Slf4j
-public class App 
-{
-    public static void main( String[] args ) throws IOException {
-        //TODO#15 SimpleHttpServer를 시작합니다.
-        SimpleHttpServer simpleHttpServer = new SimpleHttpServer(8080);
-        simpleHttpServer.start();
+public class App {
+    public static void main(String[] args) {
+        try {
+            SimpleHttpServer simpleHttpServer = new SimpleHttpServer(8080);
+            simpleHttpServer.start();
+        } catch (ServerInitializationException e) {
+            log.error("서버 초기화 실패: ", e);
+            System.exit(1); // 심각한 오류로 인한 종료
+        } catch (IOException e) {
+            log.error("서버 실행 중 오류 발생: ", e);
+            System.exit(1);
+        }
     }
 }
