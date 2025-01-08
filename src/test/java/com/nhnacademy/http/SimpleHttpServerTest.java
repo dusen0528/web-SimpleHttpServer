@@ -12,6 +12,7 @@
 
 package com.nhnacademy.http;
 
+import com.nhnacademy.exceptions.ServerInitializationException;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.*;
 
@@ -34,7 +35,11 @@ class SimpleHttpServerTest {
     static void beforeAllSetUp(){
         Thread thread = new Thread(
                 ()->{
-                    simpleHttpServer = new SimpleHttpServer(TEST_PORT);
+                    try {
+                        simpleHttpServer = new SimpleHttpServer(TEST_PORT);
+                    } catch (ServerInitializationException e) {
+                        throw new RuntimeException(e);
+                    }
                     try {
                         simpleHttpServer.start();
                     } catch (IOException e) {
@@ -57,8 +62,8 @@ class SimpleHttpServerTest {
         HttpResponse<String> response = httpClient.send(request,HttpResponse.BodyHandlers.ofString());
         log.debug("response:{}",response.body());
 
-        //TODO#100 - response.statusCode() == 200 검증 합니다.
-
+        // - response.statusCode() == 200 검증 합니다.
+        Assertions.assertTrue(response.statusCode()==200);
     }
 
     @Test
@@ -71,8 +76,14 @@ class SimpleHttpServerTest {
 
         HttpResponse<String> response = httpClient.send(request,HttpResponse.BodyHandlers.ofString());
 
-        //TODO#101 - response.body() 'hello' or 'java' 문자열이 포함되었는지 검증 합니다.
+        // - response.body() 'hello' or 'java' 문자열이 포함되었는지 검증 합니다.
         Assertions.assertAll(
+                ()->{
+                    Assertions.assertTrue(response.body().contains("hello"));
+                },
+                ()->{
+                    Assertions.assertTrue(response.body().contains("java"));
+                }
 
         );
     }
@@ -90,19 +101,28 @@ class SimpleHttpServerTest {
         String actual = contentTypeOptional.get().toLowerCase();
         log.debug("contentType:{}",actual);
 
-        //TODO#102 contentType이 'text/html' 검증 합니다.
-
+        // contentType이 'text/html' 검증 합니다.
+        Assertions.assertTrue(actual.contains("text/html"));
 
     }
 
     @Test
     @DisplayName("charset utf-8")
     void request4() throws URISyntaxException, IOException, InterruptedException {
-        //TODO#103 contentType header의 charset=utf-8 인지 검증 합니다.
+        //contentType header의 charset=utf-8 인지 검증 합니다.
+        HttpClient httpClient = HttpClient.newHttpClient();
+        HttpRequest request = HttpRequest.newBuilder()
+                .uri(new URI(String.format("http://localhost:%d",TEST_PORT)))
+                .build();
 
+        HttpResponse<String> response = httpClient.send(request,HttpResponse.BodyHandlers.ofString());
+        Optional<String> contentLengthOptional = response.headers().firstValue("Content-Length");
+        String actual = contentLengthOptional.get();
 
+        log.debug("Content-Length:{}",actual);
 
-
+        // content-Length 값이 존재하는지 검증 합니다.
+        Assertions.assertTrue(Objects.nonNull(actual) && !actual.isBlank() );
     }
 
     @AfterAll

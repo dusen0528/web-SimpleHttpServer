@@ -12,6 +12,7 @@
 
 package com.nhnacademy;
 
+import com.nhnacademy.exceptions.ServerInitializationException;
 import com.nhnacademy.http.HttpRequestHandler;
 import com.nhnacademy.http.SimpleHttpServer;
 import lombok.extern.slf4j.Slf4j;
@@ -22,8 +23,8 @@ import java.net.Socket;
 @Slf4j
 public class App 
 {
-    public static void main( String[] args ) throws IOException {
-        SimpleHttpServer simpleHttpServer = new SimpleHttpServer();
+    public static void main( String[] args ) throws IOException, ServerInitializationException {
+        SimpleHttpServer simpleHttpServer = new SimpleHttpServer(8080);
         simpleHttpServer.start();
     }
 }
