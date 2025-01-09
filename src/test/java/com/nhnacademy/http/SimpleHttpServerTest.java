@@ -51,8 +51,8 @@ class SimpleHttpServerTest {
         HttpResponse<String> response = httpClient.send(request,HttpResponse.BodyHandlers.ofString());
         log.debug("response:{}",response.body());
 
-        //TODO#105 threadB 문자열이 포함되었는지 검증 합니다.
-
+        // threadB 문자열이 포함되었는지 검증 합니다.
+        Assertions.assertTrue(response.body().toString().toLowerCase().contains("threadb"));
     }
 
     @Test
@@ -67,7 +67,9 @@ class SimpleHttpServerTest {
         HttpResponse<String> response = httpClient.send(request,HttpResponse.BodyHandlers.ofString());
         log.debug("response:{}",response.body());
 
-        //TODO#106 threadA 문자열이 포함되었는지 검증 합니다.
+        //threadA 문자열이 포함되었는지 검증 합니다.
+        Assertions.assertTrue(response.body().toString().toLowerCase().contains("threada"));
+
 
     }
 
@@ -75,32 +77,70 @@ class SimpleHttpServerTest {
     @Order(3)
     @DisplayName("status code : 200 ok")
     void request1() throws URISyntaxException, IOException, InterruptedException {
-        //TODO#107 response.statusCode()인지 검증 합니다.
+        // response.statusCode()인지 검증 합니다.
+        HttpClient httpClient = HttpClient.newHttpClient();
+        HttpRequest request = HttpRequest.newBuilder()
+                .uri(new URI(String.format("http://localhost:%d", TEST_PORT)))
+                .build();
 
+        HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
+        log.debug("response:{}", response.body());
+        Assertions.assertEquals(200, response.statusCode());
     }
+
 
     @Test
     @Order(4)
     @DisplayName("response: hello java")
     void request2() throws URISyntaxException, IOException, InterruptedException {
-        //TODO#108 response.body()에 'hello' or 'java' 문자열이 포함되는지 검증 합니다.
+        // response.body()에 'hello' or 'java' 문자열이 포함되는지 검증 합니다.
 
+        HttpClient httpClient = HttpClient.newHttpClient();
+        HttpRequest request = HttpRequest.newBuilder()
+                .uri(new URI(String.format("http://localhost:%d", TEST_PORT)))
+                .build();
+
+        HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
+        Assertions.assertAll(
+                ()->{
+                    Assertions.assertTrue(response.body().contains("hello"));
+                },
+                ()->{
+                    Assertions.assertTrue(response.body().contains("java"));
+                }
+        );
     }
 
     @Test
     @Order(5)
     @DisplayName("content-type")
     void request3() throws URISyntaxException, IOException, InterruptedException {
-        //TODO#109 Content-Type header가 text/html 인지 검증 합니다.
+        // Content-Type header가 text/html 인지 검증 합니다.
+        HttpClient httpClient = HttpClient.newHttpClient();
+        HttpRequest request = HttpRequest.newBuilder()
+                .uri(new URI(String.format("http://localhost:%d", TEST_PORT))).build();
 
+        HttpResponse <String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
+        Optional <String> contentTypeOptional = response.headers().firstValue("Content-Type");
+        String actual = contentTypeOptional.get().toLowerCase();
+        log.debug("contentType:{}", actual);
+        Assertions.assertTrue(actual.contains("text/html"));
     }
 
     @Test
     @Order(6)
     @DisplayName("charset utf-8")
     void request4() throws URISyntaxException, IOException, InterruptedException {
-        //TODO#110 charset이 utf-8인지 검증 합니다.
+        // charset이 utf-8인지 검증 합니다.
+        HttpClient httpClient = HttpClient.newHttpClient();
+        HttpRequest request = HttpRequest.newBuilder().uri(new URI(String.format("http://localhost:%d", TEST_PORT))).build();
+        HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
 
+        Optional <String> contentTypeOptional = response.headers().firstValue("Content-Type");
+        String actual = contentTypeOptional.get().toLowerCase();
+        log.debug("contentType:{}", actual);
+
+        Assertions.assertTrue(actual.contains("utf-8"));
     }
 
     @AfterAll
