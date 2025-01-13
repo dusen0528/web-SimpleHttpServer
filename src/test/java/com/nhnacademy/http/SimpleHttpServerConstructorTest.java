@@ -10,19 +10,20 @@
  * +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
  */
 
-package com.nhnacademy;
+package com.nhnacademy.http;
 
-import com.nhnacademy.http.SimpleHttpServer;
-import lombok.extern.slf4j.Slf4j;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
 
+class SimpleHttpServerConstructorTest {
 
-
-@Slf4j
-public class App 
-{
-
-    public static void main( String[] args ){
-        SimpleHttpServer simpleHttpServer = new SimpleHttpServer();
-        simpleHttpServer.start();
+    @Test
+    @DisplayName("port:-8080")
+    void constructorPortCheck(){
+        Assertions.assertThrows(IllegalArgumentException.class,()->{
+            new SimpleHttpServer(-8080);
+        });
     }
+
 }
