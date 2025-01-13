@@ -20,6 +20,9 @@ import java.io.IOException;
 import java.util.Objects;
 
 @Slf4j
+/* Java에서 Thread는 implements Runnable or extends Thread를 이용해서 Thread를 만들 수 있습니다.
+*  implements Runnable을 사용하여 구현 합니다.
+*/
 public class HttpRequestHandler implements Runnable {
 
 
@@ -54,6 +57,8 @@ public class HttpRequestHandler implements Runnable {
                 log.debug("RequestHandler error : {}",e.getMessage(),e);
             }
 
+
         }
+
     }
 }

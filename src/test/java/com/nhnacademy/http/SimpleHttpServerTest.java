@@ -12,6 +12,7 @@
 
 package com.nhnacademy.http;
 
+
 import lombok.extern.slf4j.Slf4j;
 
 import org.junit.jupiter.api.*;
@@ -22,6 +23,7 @@ import java.net.URISyntaxException;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+
 import java.util.Optional;
 
 @Slf4j
@@ -72,6 +74,7 @@ class SimpleHttpServerTest {
         HttpResponse<String> response = httpClient.send(request,HttpResponse.BodyHandlers.ofString());
         log.debug("response:{}",response.body());
 
+
         //threadA 문자열이 포함되었는지 검증 합니다.
         Assertions.assertTrue(response.body().toString().toLowerCase().contains("threada"));
 
@@ -106,6 +109,7 @@ class SimpleHttpServerTest {
                 .build();
 
         HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
+
         Assertions.assertAll(
                 ()->{
                     Assertions.assertTrue(response.body().contains("hello"));
@@ -146,10 +150,12 @@ class SimpleHttpServerTest {
         log.debug("contentType:{}", actual);
 
         Assertions.assertTrue(actual.contains("utf-8"));
+
     }
 
     @AfterAll
     static void tearDown() throws InterruptedException {
+
        Thread.sleep(1000);
     }
 
