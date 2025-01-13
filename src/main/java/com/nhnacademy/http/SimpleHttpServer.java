@@ -12,7 +12,9 @@
 
 package com.nhnacademy.http;
 
-import com.nhnacademy.exceptions.ServerInitializationException;
+import com.nhnacademy.http.channel.HttpJob;
+import com.nhnacademy.http.channel.RequestChannel;
+
 import lombok.extern.slf4j.Slf4j;
 import java.io.*;
 import java.net.ServerSocket;
@@ -25,38 +27,47 @@ public class SimpleHttpServer {
     private static final int DEFAULT_PORT=8080;
     private final ServerSocket serverSocket;
 
-    public SimpleHttpServer() throws ServerInitializationException {
-        this(DEFAULT_PORT);
+
+    //TODO#1 CRLF를 선언합니다. CRLF는 Carriage Return (CR) 와 Line Feed (LF)를 의미하며, HTTP 프로토콜에서 줄 바꿈을 나타내기 위해 사용됩니다. 이는 \r\n으로 표현됩니다.
+    private static final String CRLF="FIXME";
+
+    private final AtomicLong atomicCounter;
+
+    private final RequestChannel requestChannel;
+
+    public SimpleHttpServer(){
+        //TODO#2 기본 port는 DEFAULT_PORT을 사용합니다.
+        port =0;
+        serverSocket = null;
     }
 
-    public SimpleHttpServer(int port) throws ServerInitializationException {
-        // port < 0 IllegalArgumentException이 발생 합니다. 적절한 Error Message를 작성하세요
-        if(port < 0) throw new IllegalArgumentException("port는 0 미만일 수 없습니다");
+    private WorkerThreadPool workerThreadPool;
 
-        // serverSocket을 생성합니다.
-        this.port = port;
-        try {
-            serverSocket = new ServerSocket(this.port);
-        }catch (IOException e){
-            throw new ServerInitializationException(
-                    "서버 소켓을 초기화하는 중 오류가 발생했습니다: " + port + " 포트", e);
-
+    public SimpleHttpServer(int port) {
+        if(port<=0){
+            throw new IllegalArgumentException(String.format("Invalid Port:%d",port));
         }
+        this.port = port;
+        // RequestChannel() 초기화 합니다.
+        requestChannel = new RequestChannel();
+
+        // workerThreadPool 초기화 합니다.
+        workerThreadPool = new WorkerThreadPool(requestChannel);
     }
 
-    public synchronized void start() throws IOException {
-        try{
-            // interrupt가 발생하면 application이 종료 합니다. while 조건을 수정하세요.
-            while(!Thread.currentThread().isInterrupted()){
-                //client가 연결될 때 까지 대기 합니다.
-                Socket client = serverSocket.accept();
+    public void start(){
+        // workerThreadPool을 시작 합니다.
+        workerThreadPool.start();
 
-                //Client와 서버가 연결 되면 HttpRequestHandler를 이용해서 Thread을 생성하고 실행 합니다.
-                Thread thread = new Thread(new HttpRequestHandler(client));
-                thread.start();
+        try(ServerSocket serverSocket = new ServerSocket(8080);){
+            while(true){
+                Socket client = serverSocket.accept();
+                //Queue(requestChannel)에 HttpJob 객체를 배치 합니다.
+                requestChannel.addHttpJob(new HttpJob(client));
             }
-        }catch (Exception e){
-            log.debug("{},",e.getMessage());
+        }catch (IOException e){
+            log.error("server error:{}",e);
+
         }
     }
 }

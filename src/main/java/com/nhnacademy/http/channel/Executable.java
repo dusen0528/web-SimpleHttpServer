@@ -10,20 +10,11 @@
  * +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
  */
 
-package com.nhnacademy.http;
+package com.nhnacademy.http.channel;
 
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
+import java.io.IOException;
 
-class SimpleHttpServerConstructorTest {
-
-    @Test
-    @DisplayName("port:-8080")
-    void constructorPortCheck(){
-        Assertions.assertThrows(IllegalArgumentException.class,()->{
-            new SimpleHttpServer(-8080);
-        });
-    }
-
+// Executable interface를 구현한 객체는  WorkerThread(작업자)가 execute method를 호출 합니다.
+public interface Executable {
+    void execute() throws IOException;
 }

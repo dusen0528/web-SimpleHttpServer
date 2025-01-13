@@ -12,10 +12,11 @@
 
 package com.nhnacademy.http;
 
+import com.nhnacademy.http.channel.*;
 import lombok.extern.slf4j.Slf4j;
 
-import java.io.*;
-import java.net.Socket;
+
+import java.io.IOException;
 import java.util.Objects;
 
 @Slf4j
@@ -23,67 +24,40 @@ import java.util.Objects;
 *  implements Runnable을 사용하여 구현 합니다.
 */
 public class HttpRequestHandler implements Runnable {
-    private final Socket client;
 
-    private final static String CRLF="\r\n";
 
-    public HttpRequestHandler(Socket client) {
-        //생성자를 초기화 합니다., cleint null or socket close 되었다면 적절히 Exception을 발생시킵니다.
-        if (Objects.isNull(client)|| client.isClosed()) {
-            throw new IllegalArgumentException("client is null");
+    private final RequestChannel requestChannel;
+
+    public HttpRequestHandler(RequestChannel requestChannel) {
+        if(Objects.isNull(requestChannel)){
+            throw new IllegalArgumentException("requestChannel is null");
         }
-        this.client = client;
+        this.requestChannel = requestChannel;
+
     }
 
-
+    @Override
     public void run() {
-        //exercise-simple-http-server-step1을 참고 하여 구현 합니다.
+        while (!Thread.currentThread().isInterrupted()) {
+            try {
+                // requestChannel로 부터 httpJob을 할당 받습니다.
+                Executable httpJob = requestChannel.getHttpJob();
 
-        StringBuilder requestBuilder =new StringBuilder();
-        try(BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(client.getInputStream()));
-            BufferedWriter bufferedWriter = new BufferedWriter(new OutputStreamWriter(client.getOutputStream()));
-        ){
-                while(true){
-                    String line = bufferedReader.readLine();
 
-                    requestBuilder.append(line);
+                //httpJob 객체의 execute() method를 실행 합니다.
+                httpJob.execute();
 
-                    log.debug("line: {}", line);
-                    if(Objects.isNull(line)|| line.length()==0){
-                        break;
-                    }
+            } catch (Exception e) {
+                // 상위 레벨의 다른 코드 또는 스레드가 이 스레드가 인터럽트 되었음을 인지 할 수 있습니다.
+                if(e.getMessage().contains(InterruptedException.class.getName())){
+                    Thread.currentThread().interrupt();
+
                 }
-
-                StringBuilder responseBody = new StringBuilder();
-                responseBody.append("<html>");
-                responseBody.append("<body>");
-                responseBody.append("<h1>hello java</h1>");
-                responseBody.append("</body>");
-                responseBody.append("</html>");
+                // 종료될 떄 필요한 코드가 있다면 작성 합니다.
+                log.debug("RequestHandler error : {}",e.getMessage(),e);
+            }
 
 
-                StringBuilder responseHeader = new StringBuilder();
-                responseHeader.append(String.format("HTTP/1.1 200 OK%s",CRLF));
-                responseHeader.append(String.format("Server: HTTP server/0.1%s",CRLF));
-                responseHeader.append(String.format("Content-type: text/html; charset=%s%s","UTF-8",CRLF));
-                responseHeader.append(String.format("Connection: Closed%s",CRLF));
-                responseHeader.append(String.format("Content-Length:%d %s%s",responseBody.length(),CRLF,CRLF));
-
-            bufferedWriter.write(responseHeader.toString());
-                bufferedWriter.write(responseBody.toString());
-
-                bufferedWriter.flush();
-
-        } catch (IOException e) {
-            log.error("server error : {}", e);
-        }finally {
-                if(Objects.nonNull(client)){
-                    try{
-                        client.close();
-                    }catch (IOException e){
-                        log.error("client close error : {}", e);
-                    }
-                }
         }
 
     }
