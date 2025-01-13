@@ -13,6 +13,7 @@
 package com.nhnacademy.http;
 
 import lombok.extern.slf4j.Slf4j;
+
 import org.junit.jupiter.api.*;
 
 import java.io.IOException;
@@ -35,14 +36,17 @@ class SimpleHttpServerTest {
         thread = new Thread(()->{
             SimpleHttpServer simpleHttpServer = new SimpleHttpServer(TEST_PORT);
             simpleHttpServer.start();
+
         });
         thread.start();
     }
 
     @Test
+
     @Order(1)
     @DisplayName("threadB - 홀수요청")
     void requestEvenNumber() throws URISyntaxException, IOException, InterruptedException {
+
         HttpClient httpClient = HttpClient.newHttpClient();
         HttpRequest request = HttpRequest.newBuilder()
                 .uri(new URI(String.format("http://localhost:%d",TEST_PORT)))
@@ -50,6 +54,7 @@ class SimpleHttpServerTest {
 
         HttpResponse<String> response = httpClient.send(request,HttpResponse.BodyHandlers.ofString());
         log.debug("response:{}",response.body());
+
 
         // threadB 문자열이 포함되었는지 검증 합니다.
         Assertions.assertTrue(response.body().toString().toLowerCase().contains("threadb"));
