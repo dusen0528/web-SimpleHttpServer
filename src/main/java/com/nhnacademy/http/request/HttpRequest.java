@@ -14,7 +14,7 @@ package com.nhnacademy.http.request;
 
 import java.util.Map;
 
-//TODO#1 Http Request를 Abstraction한 interface 입니다.
+// Http Request를 Abstraction한 interface 입니다.
 public interface HttpRequest {
     //GET, POST, ....
     String getMethod();

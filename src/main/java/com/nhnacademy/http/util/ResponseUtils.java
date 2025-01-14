@@ -59,7 +59,7 @@ public class ResponseUtils {
      * @return true or false
      */
     public static boolean isExist(String filePath){
-        /* TODO#7 isExist를 구현합니다.
+        /* #7 isExist를 구현합니다.
            ex) filePat=/index.html 이면 /resources/index.html이 존재하면 true, 존재하지 않다면 false를 반환 합니다.
            ex) filePath=/ false를 반환 합니다.
         */
@@ -77,7 +77,7 @@ public class ResponseUtils {
      * @throws IOException
      */
     public static String tryGetBodyFromFile(String filePath) throws IOException {
-        /* TODO#9 tryGetBodyFromFile 구현 합니다.
+        /* #9 tryGetBodyFromFile 구현 합니다.
          * ex) filePath = /index.html -> /resources/index.html 파일을 읽어서 반환 합니다.
          * */
 
@@ -103,7 +103,7 @@ public class ResponseUtils {
      * @return responseHeader를 String 반환
      */
     public static String createResponseHeader(int httpStatusCode, String charset, int contentLength ){
-        /* TODO#11 responseHeader를 생성 합니다. 아래 header 예시를 참고
+        /*  responseHeader를 생성 합니다. 아래 header 예시를 참고
 
             - 200 OK
             HTTP/1.0 200 OK
