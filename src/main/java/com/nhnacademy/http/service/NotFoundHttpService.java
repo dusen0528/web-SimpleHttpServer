@@ -31,14 +31,22 @@ public class NotFoundHttpService implements HttpService{
     public void doGet(HttpRequest httpRequest, HttpResponse httpResponse) {
         //Body-설정
         String responseBody = null;
+        try{
+            responseBody = ResponseUtils.tryGetBodyFromFile(ResponseUtils.DEFAULT_404);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
 
         //Header-설정
-        String responseHeader = null;
+        String responseHeader = ResponseUtils.createResponseHeader(404, "UTF-8", responseBody.getBytes().length);
 
         //PrintWriter 응답
-        try(PrintWriter bufferedWriter = null;){
+        try(PrintWriter bufferedWriter = httpResponse.getWriter();){
+            bufferedWriter.write(responseHeader);
+            bufferedWriter.write(responseBody);
+            bufferedWriter.flush();
 
-        } catch (Exception e) {
+        } catch (IOException e) {
             throw new RuntimeException(e);
         }
     }

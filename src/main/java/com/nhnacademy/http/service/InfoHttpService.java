@@ -17,6 +17,7 @@ import com.nhnacademy.http.response.HttpResponse;
 import com.nhnacademy.http.util.ResponseUtils;
 import lombok.extern.slf4j.Slf4j;
 
+import java.awt.image.RescaleOp;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.net.URLDecoder;
@@ -40,13 +41,17 @@ public class InfoHttpService implements HttpService {
     public void doGet(HttpRequest httpRequest, HttpResponse httpResponse) {
         // body-설정
         String responseBody = null;
+        try{
+            responseBody = ResponseUtils.tryGetBodyFromFile(httpRequest.getRequestURI());
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
 
 
-
-        String id =  null;
-        String name= null;
+        String id =  httpRequest.getParameter("id");
+        String name=  httpRequest.getParameter("name");
         name = URLDecoder.decode(name, StandardCharsets.UTF_8);
-        String age = null;
+        String age = httpRequest.getParameter("age");
 
         log.debug("id:{}",id);
         log.debug("name:{}",name);
@@ -57,12 +62,15 @@ public class InfoHttpService implements HttpService {
         responseBody = responseBody.replace("${age}",age);
 
         //Header-설정
-        String responseHeader = null;
+        String responseHeader = ResponseUtils.createResponseHeader(200, "UTF-8", responseBody.getBytes().length);
 
         //PrintWriter를 이용한 응답
-        try(PrintWriter bufferedWriter = null;){
+        try(PrintWriter bufferedWriter = httpResponse.getWriter()){
+            bufferedWriter.write(responseHeader);
+            bufferedWriter.write(responseBody);
+            bufferedWriter.flush();
 
-        } catch (Exception e) {
+        } catch (IOException e) {
             throw new RuntimeException(e);
         }
     }
